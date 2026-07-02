@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Autenticando...</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f9fafb; color: #374151; }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #0d47a1; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .container { text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <p>Autenticação concluída. Carregando mapa...</p>
+    </div>
+    <script>
+        // O ArcGIS redireciona para cá adicionando os parâmetros na hash da URL (#access_token=...)
+        if (window.location.hash) {
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const token = params.get('access_token');
+            const error = params.get('error');
+            
+            if (token && window.opener) {
+                // Envia o token para a janela principal (React) de forma segura
+                window.opener.postMessage({ type: 'ARCGIS_TOKEN', token: token }, window.location.origin);
+                // Fecha o popup
+                window.close();
+            } else if (error) {
+                console.error("Erro na autenticação:", error);
+                document.querySelector('p').innerText = "Erro na autenticação: " + error;
+            }
+        }
+    </script>
+</body>
+</html>
